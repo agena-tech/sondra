@@ -95,7 +95,7 @@ if ! command -v ollama >/dev/null 2>&1; then
     if command -v apt >/dev/null 2>&1; then
         echo -e "${CYAN}[*] Trying to install Ollama with apt...${RESET}"
 
-        if sudo apt update && sudo apt install -y ollama; then
+        if sudo apt update && sudo apt install -y ollama zstd; then
             OLLAMA_INSTALLED=true
             echo -e "${CYAN}[+] Ollama installed with apt.${RESET}"
         else
