@@ -5,6 +5,18 @@
 # 🔰 SONDRA  
 ### Unified Autonomous AI Agent for Research, Security, and Intelligent Automation
 
+<p align="center">
+  <a href="https://www.instagram.com/xx___xxbora_anezatraxx___xx_x/">
+    <img src="https://img.shields.io/badge/Instagram-Anezatra-E4405F?logo=instagram&logoColor=white&style=for-the-badge" alt="Instagram">
+  </a>
+  <a href="https://www.youtube.com/@anezatra_official">
+    <img src="https://img.shields.io/badge/YouTube-Anezatra_Official-FF0000?logo=youtube&logoColor=white&style=for-the-badge" alt="YouTube">
+  </a>
+  <a href="https://t.me/anezatra">
+    <img src="https://img.shields.io/badge/Telegram-Anezatra-26A5E4?logo=telegram&logoColor=white&style=for-the-badge" alt="Telegram">
+  </a>
+</p>
+
 **An open-source platform for multi-domain autonomous agent workflows.**
 
 Sondra is a unified AI agent system designed for users who need a single,
