@@ -1,5 +1,0 @@
-SCAN MODE: general
-SCAN LEVEL: standard
-EFFECTIVE MODE: general
-ACTIVE PROMPT MODE: general
-TEMPLATE USED: general_prompt.jinja
