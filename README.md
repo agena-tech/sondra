@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/banner.png" alt="Sondra Autonomous Agent Banner" width="100%">
+  <img src="docs/sondra.png" alt="Sondra Autonomous Agent Banner" width="100%">
 </p>
 
 # 🔰 SONDRA  
