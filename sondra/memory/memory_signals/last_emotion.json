@@ -1,0 +1,12 @@
+{
+  "saved_at": "2026-04-28T16:54:30.469612+00:00",
+  "happiness": 0.0,
+  "sadness": 0.0,
+  "stress": 0.0,
+  "neutral": 100.0,
+  "confidence": 35.48,
+  "curiosity": 56.0,
+  "tone": "steady",
+  "signal_category": "neutral",
+  "signal_strength": 0.9175
+}

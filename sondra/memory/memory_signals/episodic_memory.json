@@ -1,0 +1,11 @@
+{
+  "failure_keywords": [
+    "error",
+    "failed",
+    "timeout",
+    "exception",
+    "invalid",
+    "not found",
+    "denied"
+  ]
+}

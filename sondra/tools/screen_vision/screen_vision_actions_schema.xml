@@ -1,0 +1,38 @@
+﻿<tools>
+  <tool name="analyze_image">
+    <description>Analyze screen content from an image URL or local image path using an OpenAI-compatible vision endpoint.
+This tool is available only in GENERAL mode.</description>
+    <parameters>
+      <parameter name="image_url" type="string" required="false">
+        <description>HTTP(S) image URL. If provided, this is used with priority over image_path.</description>
+      </parameter>
+      <parameter name="image_path" type="string" required="false">
+        <description>Optional absolute image path. Used when image_url is omitted.</description>
+      </parameter>
+      <parameter name="analysis_prompt" type="string" required="false">
+        <description>Optional custom instruction for image analysis.</description>
+      </parameter>
+    </parameters>
+    <returns type="Dict[str, Any]">
+      <description>Returns success flag, analysis_text, source, screenshot_path, screenshot image data, and vision model/base metadata.</description>
+    </returns>
+    <notes>
+- Prefer this tool when a task requires visual interpretation of on-screen content.
+- image_url has priority over image_path.
+- If neither image_url nor image_path is provided, the tool returns an error.
+- If a direct image URL is already available, call this tool directly with image_url.
+- Do not use browser navigation or terminal download commands before calling this tool for direct image URLs.
+- `inspect_screen` is deprecated; use `analyze_image` only.
+    </notes>
+    <examples>
+&lt;function=analyze_image&gt;
+&lt;parameter=image_url&gt;https://example.com/screen.png&lt;/parameter&gt;
+&lt;/function&gt;
+
+&lt;function=analyze_image&gt;
+&lt;parameter=image_path&gt;/tmp/screen.png&lt;/parameter&gt;
+&lt;parameter=analysis_prompt&gt;List visible colors and key text.&lt;/parameter&gt;
+&lt;/function&gt;
+    </examples>
+  </tool>
+</tools>

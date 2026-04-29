@@ -1,0 +1,21 @@
+
+          _______  
+         /       /
+___     /   ____/   
+\   \  /   /\            ___       ______   ______   _   __   ___ 
+ \   \/___/  \          /   |     / ____/  / ____/  / | / /  /   | 
+  \       \   \        / /| |    / / __   / __/    /  |/ /  / /| | 
+   \_______\   \      / ___ |   / /_/ /  / /___   / /|  /  / ___ | 
+           /   /     /_/  |_|   \____/  /_____/  /_/ |_/  /_/  |_|   
+          /   /        
+          \  /      
+           \/       Copyright (C) 2026, Agena Memory Systems 
+
+SYSTEM INFO
+-----------
+
+MEMORY NAME  : ARX
+MEMORY TYPE  : COGNITIVE
+VERSION      : v1.0.0-240420-B12-ST
+
+MAINTAINER   : anezatra@gmail.com

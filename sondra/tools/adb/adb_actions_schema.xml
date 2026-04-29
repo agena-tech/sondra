@@ -1,0 +1,26 @@
+<tools>
+  <tool name="adb_exec">
+    <description>Execute a raw adb command via the configured HTTP bridge endpoint.</description>
+    <parameters>
+      <parameter name="cmd" type="string" required="true">
+        <description>Raw adb command without the leading "adb". Examples: "devices", "shell input tap 500 1000", "shell input keyevent 3", "exec-out screencap -p".</description>
+      </parameter>
+    </parameters>
+    <returns type="string">
+      <description>Raw command output returned by the HTTP bridge.</description>
+    </returns>
+    <notes>
+- Bridge URL must be configured with SONDRA_ADB_URL.
+- For `exec-out screencap -p`, binary output is saved to SONDRA_ADB_SCREENSHOT_PATH (default: /workspace/adb_screencap.png).
+    </notes>
+    <examples>
+&lt;function=adb_exec&gt;
+&lt;parameter=cmd&gt;devices&lt;/parameter&gt;
+&lt;/function&gt;
+
+&lt;function=adb_exec&gt;
+&lt;parameter=cmd&gt;shell input keyevent 3&lt;/parameter&gt;
+&lt;/function&gt;
+    </examples>
+  </tool>
+</tools>

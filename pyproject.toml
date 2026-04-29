@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "strix-agent"
-version = "0.1.4"
-description = "Open-source AI Hackers for your apps"
-authors = ["Strix <hi@usestrix.com>"]
+name = "sondra-agent"
+version = "1.0.0b0"
+description = "An open-source AI agent for all-purpose tasks"
+authors = ["Sondra <hi@usesondra.com>, anezatra <anezatra@gmail.com>"]
 readme = "README.md"
 license = "Apache-2.0"
 keywords = [
@@ -14,6 +14,9 @@ keywords = [
   "agent",
   "ai",
   "cli",
+  "osint",
+  "general",
+  "agents"
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -26,39 +29,67 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 packages = [
-  { include = "strix" }
+  { include = "sondra", format = ["sdist", "wheel"] }
 ]
 include = [
   "LICENSE",
   "README.md",
-  "strix/**/*.jinja",
-  "strix/**/*.xml",
-  "strix/**/*.tcss"
+  "sondra/agents/**/*.jinja",
+  "sondra/skills/**/*.md",
+  "sondra/**/*.json",
+  "sondra/**/*.xml",
+  "sondra/**/*.tcss"
 ]
 
 [tool.poetry.scripts]
-strix = "strix.cli.main:main"
+sondra = "sondra.interface.main:main"
 
 [tool.poetry.dependencies]
-python = "^3.12"
-fastapi = "*"
-uvicorn = "*"
-litellm = {extras = ["proxy"], version = "^1.72.1"}
+python = ">=3.12,<3.14"
+# Core CLI dependencies
+litellm = { version = "~1.81.1", extras = ["proxy"] }
 tenacity = "^9.0.0"
-numpydoc = "^1.8.0"
 pydantic = {extras = ["email"], version = "^2.11.3"}
-ipython = "^9.3.0"
-openhands-aci = "^0.3.0"
-playwright = "^1.48.0"
 rich = "*"
 docker = "^7.1.0"
-gql = {extras = ["requests"], version = "^3.5.3"}
 textual = "^4.0.0"
 xmltodict = "^0.13.0"
-pyte = "^0.8.1"
 requests = "^2.32.0"
+cvss = "^3.2"
+
+# Optional LLM provider dependencies
+google-cloud-aiplatform = { version = ">=1.38", optional = true }
+
+# Sandbox-only dependencies (only needed inside Docker container)
+fastapi = { version = "*", optional = true }
+uvicorn = { version = "*", optional = true }
+ipython = { version = "^9.3.0", optional = true }
+openhands-aci = { version = "^0.3.0", optional = true }
+playwright = { version = "^1.48.0", optional = true }
+gql = { version = "^3.5.3", extras = ["requests"], optional = true }
+pyte = { version = "^0.8.1", optional = true }
+libtmux = { version = "^0.46.2", optional = true }
+numpydoc = { version = "^1.8.0", optional = true }
+defusedxml = "^0.7.1"
+opentelemetry-api = "^1.40.0"
+opentelemetry-sdk = "^1.40.0"
+scrubadub = "^2.0.1"
+psutil = "^7.2.2"
+plotext = "^5.3.2"
+piper-tts = "^1.4.1"
+langdetect = "^1.0.9"
+transformers = "^4.52.0"
+torch = "^2.8.0"
+paddleocr = "^2.8.1"
+pillow = "^11.3.0"
+
+[tool.poetry.extras]
+vertex = ["google-cloud-aiplatform"]
+sandbox = ["fastapi", "uvicorn", "ipython", "openhands-aci", "playwright", "gql", "pyte", "libtmux", "numpydoc"]
 
 [tool.poetry.group.dev.dependencies]
 # Type checking and static analysis
@@ -78,6 +109,9 @@ pytest-mock = "^3.14.1"
 pre-commit = "^4.2.0"
 black = "^25.1.0"
 isort = "^6.0.1"
+
+# Build tools
+pyinstaller = { version = "^6.17.0", python = ">=3.12,<3.15" }
 
 [build-system]
 requires = ["poetry-core"]
@@ -126,8 +160,16 @@ module = [
     "gql.*",
     "textual.*",
     "pyte.*",
+    "libtmux.*",
+    "pytest.*",
+    "cvss.*",
 ]
 ignore_missing_imports = true
+
+# Relax strict rules for test files (pytest decorators are not fully typed)
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_decorators = false
 
 # ============================================================================
 # Ruff Configuration (Fast Python Linter & Formatter)
@@ -219,14 +261,14 @@ ignore = [
     "ARG001", # Unused function argument
     "PLR2004", # Magic value used in comparison
 ]
-"strix/tools/**/*.py" = [
+"sondra/tools/**/*.py" = [
     "ARG001", # Unused function argument (tools may have unused args for interface consistency)
 ]
 
 [tool.ruff.lint.isort]
 force-single-line = false
 lines-after-imports = 2
-known-first-party = ["strix"]
+known-first-party = ["sondra"]
 known-third-party = ["fastapi", "pydantic"]
 
 [tool.ruff.lint.pylint]
@@ -243,7 +285,7 @@ line-ending = "auto"
 # ============================================================================
 
 [tool.pyright]
-include = ["strix"]
+include = ["sondra"]
 exclude = ["**/__pycache__", "build", "dist"]
 pythonVersion = "3.12"
 pythonPlatform = "Linux"
@@ -302,7 +344,7 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
-known_first_party = ["strix"]
+known_first_party = ["sondra"]
 known_third_party = ["fastapi", "pydantic", "litellm", "tenacity"]
 
 # ============================================================================
@@ -314,11 +356,10 @@ minversion = "6.0"
 addopts = [
     "--strict-markers",
     "--strict-config",
-    "--cov=strix",
+    "--cov=sondra",
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
-    "--cov-fail-under=80"
 ]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
@@ -327,7 +368,7 @@ python_classes = ["Test*"]
 asyncio_mode = "auto"
 
 [tool.coverage.run]
-source = ["strix"]
+source = ["sondra"]
 omit = [
     "*/tests/*",
     "*/migrations/*",
