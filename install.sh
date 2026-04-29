@@ -40,6 +40,56 @@ install_package() {
 }
 
 # ------------------------------------------------------------
+# Helper: link command globally
+# ------------------------------------------------------------
+link_command_globally() {
+    local command_name="$1"
+    shift
+
+    for possible_path in "$@"; do
+        if [ -x "$possible_path" ]; then
+            echo -e "${CYAN}[*] Found $command_name at: $possible_path${RESET}"
+
+            if [ "$possible_path" != "/usr/local/bin/$command_name" ]; then
+                echo -e "${CYAN}[*] Linking $command_name to /usr/local/bin/$command_name...${RESET}"
+                sudo ln -sf "$possible_path" "/usr/local/bin/$command_name"
+            fi
+
+            if [ "$possible_path" != "/usr/bin/$command_name" ]; then
+                echo -e "${CYAN}[*] Linking $command_name to /usr/bin/$command_name...${RESET}"
+                sudo ln -sf "$possible_path" "/usr/bin/$command_name" 2>/dev/null || true
+            fi
+
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# ------------------------------------------------------------
+# PATH setup
+# ------------------------------------------------------------
+POETRY_PATH="$HOME/.local/bin"
+OLLAMA_USER_PATH="$HOME/.ollama/bin"
+
+export PATH="/usr/local/bin:/usr/bin:$POETRY_PATH:$OLLAMA_USER_PATH:$PATH"
+
+if [[ "$SHELL" == *"bash"* ]]; then
+    SHELL_RC="$HOME/.bashrc"
+elif [[ "$SHELL" == *"zsh"* ]]; then
+    SHELL_RC="$HOME/.zshrc"
+else
+    SHELL_RC="$HOME/.profile"
+fi
+
+# Add PATH permanently
+if ! grep -q 'export PATH="/usr/local/bin:/usr/bin:$HOME/.local/bin:$HOME/.ollama/bin:$PATH"' "$SHELL_RC" 2>/dev/null; then
+    echo -e "${CYAN}[*] Adding PATH permanently -> $SHELL_RC${RESET}"
+    echo 'export PATH="/usr/local/bin:/usr/bin:$HOME/.local/bin:$HOME/.ollama/bin:$PATH"' >> "$SHELL_RC"
+fi
+
+# ------------------------------------------------------------
 # Check Python
 # ------------------------------------------------------------
 if ! command -v python3 >/dev/null 2>&1; then
@@ -79,29 +129,16 @@ else
 fi
 
 # ------------------------------------------------------------
-# Poetry PATH setup
-# ------------------------------------------------------------
-POETRY_PATH="$HOME/.local/bin"
-export PATH="$POETRY_PATH:/usr/local/bin:$PATH"
-
-if [[ "$SHELL" == *"bash"* ]]; then
-    SHELL_RC="$HOME/.bashrc"
-elif [[ "$SHELL" == *"zsh"* ]]; then
-    SHELL_RC="$HOME/.zshrc"
-else
-    SHELL_RC="$HOME/.profile"
-fi
-
-# Add Poetry PATH permanently
-if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$SHELL_RC" 2>/dev/null; then
-    echo -e "${CYAN}[*] Adding Poetry PATH permanently -> $SHELL_RC${RESET}"
-    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$SHELL_RC"
-fi
-
-# ------------------------------------------------------------
 # Install Poetry
 # ------------------------------------------------------------
 echo -e "${CYAN}[*] Checking Poetry...${RESET}"
+
+link_command_globally poetry \
+    "$POETRY_PATH/poetry" \
+    "/usr/local/bin/poetry" \
+    "/usr/bin/poetry" >/dev/null 2>&1 || true
+
+export PATH="/usr/local/bin:/usr/bin:$POETRY_PATH:$PATH"
 
 if ! command -v poetry >/dev/null 2>&1; then
     echo -e "${CYAN}[!] Poetry not found, installing...${RESET}"
@@ -112,55 +149,56 @@ if ! command -v poetry >/dev/null 2>&1; then
         sudo apt install -y python3-poetry || true
     fi
 
-    export PATH="$POETRY_PATH:/usr/local/bin:$PATH"
+    export PATH="/usr/local/bin:/usr/bin:$POETRY_PATH:$PATH"
+
+    link_command_globally poetry \
+        "$POETRY_PATH/poetry" \
+        "/usr/local/bin/poetry" \
+        "/usr/bin/poetry" || true
 
     if ! command -v poetry >/dev/null 2>&1; then
         echo -e "${CYAN}[!] Poetry still not found after apt install.${RESET}"
         echo -e "${CYAN}[*] Trying official Poetry installer...${RESET}"
+
         curl -sSL https://install.python-poetry.org | python3 -
+
+        export PATH="/usr/local/bin:/usr/bin:$POETRY_PATH:$PATH"
+
+        link_command_globally poetry \
+            "$POETRY_PATH/poetry" \
+            "/usr/local/bin/poetry" \
+            "/usr/bin/poetry" || true
     fi
 
-    export PATH="$POETRY_PATH:/usr/local/bin:$PATH"
-
-    # If Poetry exists in user local bin, link it globally
-    if [ -x "$POETRY_PATH/poetry" ]; then
-        echo -e "${CYAN}[*] Linking Poetry to /usr/local/bin/poetry...${RESET}"
-        sudo ln -sf "$POETRY_PATH/poetry" /usr/local/bin/poetry
-    fi
-
-    # If apt installed poetry somewhere else, keep it as command
-    if ! command -v poetry >/dev/null 2>&1 && [ -x /usr/bin/poetry ]; then
-        echo -e "${CYAN}[*] Linking apt Poetry to /usr/local/bin/poetry...${RESET}"
-        sudo ln -sf /usr/bin/poetry /usr/local/bin/poetry
-    fi
-
-    export PATH="/usr/local/bin:$POETRY_PATH:$PATH"
-
-    # Final retry if still missing
+    # Final retry
     if ! command -v poetry >/dev/null 2>&1; then
         echo -e "${CYAN}[!] Poetry command still not found. Retrying official installer...${RESET}"
-        curl -sSL https://install.python-poetry.org | python3 -
-        export PATH="/usr/local/bin:$POETRY_PATH:$PATH"
 
-        if [ -x "$POETRY_PATH/poetry" ]; then
-            sudo ln -sf "$POETRY_PATH/poetry" /usr/local/bin/poetry
-        fi
+        curl -sSL https://install.python-poetry.org | python3 -
+
+        export PATH="/usr/local/bin:/usr/bin:$POETRY_PATH:$PATH"
+
+        link_command_globally poetry \
+            "$POETRY_PATH/poetry" \
+            "/usr/local/bin/poetry" \
+            "/usr/bin/poetry" || true
     fi
 
     if ! command -v poetry >/dev/null 2>&1; then
         echo -e "${CYAN}[!] Poetry installation failed. Command not found.${RESET}"
-        echo -e "${CYAN}[!] Try manually: sudo apt install -y python3-poetry${RESET}"
+        echo -e "${CYAN}[!] Checked paths:${RESET}"
+        echo -e "${CYAN}    $POETRY_PATH/poetry${RESET}"
+        echo -e "${CYAN}    /usr/local/bin/poetry${RESET}"
+        echo -e "${CYAN}    /usr/bin/poetry${RESET}"
         exit 1
     fi
 else
     echo -e "${CYAN}[+] Poetry already installed.${RESET}"
 
-    # Even if already installed, make sure it is globally available
-    if [ -x "$POETRY_PATH/poetry" ]; then
-        sudo ln -sf "$POETRY_PATH/poetry" /usr/local/bin/poetry
-    elif [ -x /usr/bin/poetry ]; then
-        sudo ln -sf /usr/bin/poetry /usr/local/bin/poetry
-    fi
+    link_command_globally poetry \
+        "$POETRY_PATH/poetry" \
+        "/usr/local/bin/poetry" \
+        "/usr/bin/poetry" || true
 fi
 
 echo -e "${CYAN}[+] Poetry installed:${RESET}"
@@ -171,7 +209,14 @@ poetry --version
 # ------------------------------------------------------------
 echo -e "${CYAN}[*] Checking Ollama...${RESET}"
 
-export PATH="/usr/local/bin:/usr/bin:$PATH"
+export PATH="/usr/local/bin:/usr/bin:$OLLAMA_USER_PATH:$PATH"
+
+link_command_globally ollama \
+    "$OLLAMA_USER_PATH/ollama" \
+    "/usr/local/bin/ollama" \
+    "/usr/bin/ollama" >/dev/null 2>&1 || true
+
+export PATH="/usr/local/bin:/usr/bin:$OLLAMA_USER_PATH:$PATH"
 
 if ! command -v ollama >/dev/null 2>&1; then
     echo -e "${CYAN}[!] Ollama not found, installing...${RESET}"
@@ -182,52 +227,56 @@ if ! command -v ollama >/dev/null 2>&1; then
         sudo apt install -y ollama || true
     fi
 
-    export PATH="/usr/local/bin:/usr/bin:$PATH"
+    export PATH="/usr/local/bin:/usr/bin:$OLLAMA_USER_PATH:$PATH"
+
+    link_command_globally ollama \
+        "$OLLAMA_USER_PATH/ollama" \
+        "/usr/local/bin/ollama" \
+        "/usr/bin/ollama" || true
 
     if ! command -v ollama >/dev/null 2>&1; then
         echo -e "${CYAN}[!] Ollama still not found after apt install.${RESET}"
         echo -e "${CYAN}[*] Trying official Ollama installer...${RESET}"
+
         curl -fsSL https://ollama.com/install.sh | sh
+
+        export PATH="/usr/local/bin:/usr/bin:$OLLAMA_USER_PATH:$PATH"
+
+        link_command_globally ollama \
+            "$OLLAMA_USER_PATH/ollama" \
+            "/usr/local/bin/ollama" \
+            "/usr/bin/ollama" || true
     fi
 
-    export PATH="/usr/local/bin:/usr/bin:$PATH"
-
-    # Link common Ollama locations globally
-    if [ -x /usr/local/bin/ollama ]; then
-        sudo ln -sf /usr/local/bin/ollama /usr/bin/ollama 2>/dev/null || true
-    elif [ -x /usr/bin/ollama ]; then
-        sudo ln -sf /usr/bin/ollama /usr/local/bin/ollama 2>/dev/null || true
-    elif [ -x "$HOME/.ollama/bin/ollama" ]; then
-        sudo ln -sf "$HOME/.ollama/bin/ollama" /usr/local/bin/ollama
-    fi
-
-    export PATH="/usr/local/bin:/usr/bin:$PATH"
-
-    # Final retry if still missing
+    # Final retry
     if ! command -v ollama >/dev/null 2>&1; then
         echo -e "${CYAN}[!] Ollama command still not found. Retrying official installer...${RESET}"
+
         curl -fsSL https://ollama.com/install.sh | sh
 
-        if [ -x /usr/local/bin/ollama ]; then
-            sudo ln -sf /usr/local/bin/ollama /usr/bin/ollama 2>/dev/null || true
-        elif [ -x "$HOME/.ollama/bin/ollama" ]; then
-            sudo ln -sf "$HOME/.ollama/bin/ollama" /usr/local/bin/ollama
-        fi
+        export PATH="/usr/local/bin:/usr/bin:$OLLAMA_USER_PATH:$PATH"
+
+        link_command_globally ollama \
+            "$OLLAMA_USER_PATH/ollama" \
+            "/usr/local/bin/ollama" \
+            "/usr/bin/ollama" || true
     fi
 
     if ! command -v ollama >/dev/null 2>&1; then
         echo -e "${CYAN}[!] Ollama installation failed. Command not found.${RESET}"
+        echo -e "${CYAN}[!] Checked paths:${RESET}"
+        echo -e "${CYAN}    $OLLAMA_USER_PATH/ollama${RESET}"
+        echo -e "${CYAN}    /usr/local/bin/ollama${RESET}"
+        echo -e "${CYAN}    /usr/bin/ollama${RESET}"
         exit 1
     fi
 else
     echo -e "${CYAN}[+] Ollama already installed.${RESET}"
 
-    # Even if already installed, make sure it is globally available
-    if [ -x /usr/local/bin/ollama ]; then
-        sudo ln -sf /usr/local/bin/ollama /usr/bin/ollama 2>/dev/null || true
-    elif [ -x /usr/bin/ollama ]; then
-        sudo ln -sf /usr/bin/ollama /usr/local/bin/ollama 2>/dev/null || true
-    fi
+    link_command_globally ollama \
+        "$OLLAMA_USER_PATH/ollama" \
+        "/usr/local/bin/ollama" \
+        "/usr/bin/ollama" || true
 fi
 
 echo -e "${CYAN}[+] Ollama installed:${RESET}"
@@ -264,9 +313,11 @@ echo -e "${CYAN}[*] Pulling nomic-embed-text model...${RESET}"
 ollama pull nomic-embed-text
 
 # ------------------------------------------------------------
-# Final check
+# Final command check
 # ------------------------------------------------------------
 echo -e "${CYAN}[*] Final command check...${RESET}"
+
+export PATH="/usr/local/bin:/usr/bin:$POETRY_PATH:$OLLAMA_USER_PATH:$PATH"
 
 if ! command -v poetry >/dev/null 2>&1; then
     echo -e "${CYAN}[!] Final check failed: poetry command not found.${RESET}"
@@ -278,8 +329,24 @@ if ! command -v ollama >/dev/null 2>&1; then
     exit 1
 fi
 
-echo -e "${CYAN}[+] Download complete.${RESET}"
+# ------------------------------------------------------------
+# Poetry install
+# ------------------------------------------------------------
+echo -e "${CYAN}[*] Running poetry install...${RESET}"
+
+if [ ! -f "pyproject.toml" ]; then
+    echo -e "${CYAN}[!] pyproject.toml not found.${RESET}"
+    echo -e "${CYAN}[!] Please run this script inside the Sondra project directory.${RESET}"
+    exit 1
+fi
+
+poetry install
+
+# ------------------------------------------------------------
+# Complete
+# ------------------------------------------------------------
+echo -e "${CYAN}[+] Installation complete.${RESET}"
 echo -e "${CYAN}[+] Poetry:${RESET} $(poetry --version)"
 echo -e "${CYAN}[+] Ollama:${RESET} $(ollama --version || true)"
-echo -e "${CYAN}[*] Please start:${RESET}"
+echo -e "${CYAN}[*] Start Sondra with:${RESET}"
 echo -e "${CYAN}    poetry run sondra -h${RESET}"
