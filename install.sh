@@ -52,6 +52,26 @@ if ! command -v curl >/dev/null 2>&1; then
     fi
 fi
 
+# Check zstd
+echo -e "${CYAN}[*] Checking zstd...${RESET}"
+
+if ! command -v zstd >/dev/null 2>&1; then
+    echo -e "${CYAN}[!] zstd not found, installing...${RESET}"
+
+    if command -v apt >/dev/null 2>&1; then
+        sudo apt update && sudo apt install -y zstd
+    elif command -v dnf >/dev/null 2>&1; then
+        sudo dnf install -y zstd
+    elif command -v pacman >/dev/null 2>&1; then
+        sudo pacman -Sy --noconfirm zstd
+    else
+        echo -e "${CYAN}[!] No supported package manager found. Install zstd manually.${RESET}"
+        exit 1
+    fi
+else
+    echo -e "${CYAN}[+] zstd already installed.${RESET}"
+fi
+
 # Install Poetry
 echo -e "${CYAN}[*] Downloading Poetry...${RESET}"
 curl -sSL https://install.python-poetry.org | python3 -
@@ -95,7 +115,7 @@ if ! command -v ollama >/dev/null 2>&1; then
     if command -v apt >/dev/null 2>&1; then
         echo -e "${CYAN}[*] Trying to install Ollama with apt...${RESET}"
 
-        if sudo apt update && sudo apt install -y ollama zstd; then
+        if sudo apt update && sudo apt install -y ollama; then
             OLLAMA_INSTALLED=true
             echo -e "${CYAN}[+] Ollama installed with apt.${RESET}"
         else
