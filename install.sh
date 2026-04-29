@@ -18,7 +18,7 @@ _______  _____  __   _ ______   ______ _______
 EOF
 echo -e "${RESET}"
 
-echo -e "${CYAN}[*] Starting Poetry installation...${RESET}"
+echo -e "${CYAN}[*] Starting installation...${RESET}"
 
 # Check Python
 if ! command -v python3 >/dev/null 2>&1; then
@@ -46,6 +46,9 @@ if ! command -v curl >/dev/null 2>&1; then
         sudo dnf install -y curl
     elif command -v pacman >/dev/null 2>&1; then
         sudo pacman -Sy --noconfirm curl
+    else
+        echo -e "${CYAN}[!] No supported package manager found. Install curl manually.${RESET}"
+        exit 1
     fi
 fi
 
@@ -64,7 +67,7 @@ else
     SHELL_RC="$HOME/.profile"
 fi
 
-# Add PATH permanently
+# Add Poetry PATH permanently
 if ! grep -q "$POETRY_PATH" "$SHELL_RC" 2>/dev/null; then
     echo -e "${CYAN}[*] Adding Poetry to PATH -> $SHELL_RC${RESET}"
     echo "export PATH=\"$POETRY_PATH:\$PATH\"" >> "$SHELL_RC"
@@ -73,23 +76,67 @@ fi
 # Temporary PATH
 export PATH="$POETRY_PATH:$PATH"
 
-echo -e "${CYAN}[*] Installation completed!${RESET}"
-
-# Verify installation
+# Verify Poetry
 if command -v poetry >/dev/null 2>&1; then
-    echo -e "${CYAN}[+] Poetry version:${RESET}"
+    echo -e "${CYAN}[+] Poetry installed:${RESET}"
     poetry --version
 else
     echo -e "${CYAN}[!] Poetry not found in PATH. Restart your terminal.${RESET}"
 fi
 
-if command -v poetry >/dev/null 2>&1; then
-    echo -e "${CYAN}[+] Poetry version:${RESET}"
-    poetry --version
+# Install Ollama
+echo -e "${CYAN}[*] Checking Ollama...${RESET}"
 
-    echo -e "${CYAN}[+] Download complete.${RESET}"
-    echo -e "${CYAN}[*] Please start:${RESET}"
-    echo -e "${CYAN}    poetry run sondra -h${RESET}"
+if ! command -v ollama >/dev/null 2>&1; then
+    echo -e "${CYAN}[!] Ollama not found, installing...${RESET}"
+
+    OLLAMA_INSTALLED=false
+
+    if command -v apt >/dev/null 2>&1; then
+        echo -e "${CYAN}[*] Trying to install Ollama with apt...${RESET}"
+
+        if sudo apt update && sudo apt install -y ollama; then
+            OLLAMA_INSTALLED=true
+            echo -e "${CYAN}[+] Ollama installed with apt.${RESET}"
+        else
+            echo -e "${CYAN}[!] apt install ollama failed.${RESET}"
+        fi
+    fi
+
+    if [ "$OLLAMA_INSTALLED" = false ]; then
+        echo -e "${CYAN}[*] Installing Ollama with official installer...${RESET}"
+
+        if curl -fsSL https://ollama.com/install.sh | sh; then
+            OLLAMA_INSTALLED=true
+            echo -e "${CYAN}[+] Ollama installed with official installer.${RESET}"
+        else
+            echo -e "${CYAN}[!] Ollama installation failed.${RESET}"
+            exit 1
+        fi
+    fi
 else
-    echo -e "${CYAN}[!] Poetry not found in PATH. Restart your terminal.${RESET}"
+    echo -e "${CYAN}[+] Ollama already installed.${RESET}"
 fi
+
+# Start Ollama server if needed
+echo -e "${CYAN}[*] Starting Ollama service...${RESET}"
+
+if command -v systemctl >/dev/null 2>&1; then
+    sudo systemctl enable ollama >/dev/null 2>&1 || true
+    sudo systemctl start ollama >/dev/null 2>&1 || true
+fi
+
+# Fallback for WSL / non-systemd environments
+if ! pgrep -x "ollama" >/dev/null 2>&1; then
+    echo -e "${CYAN}[*] Running ollama serve in background...${RESET}"
+    nohup ollama serve >/tmp/ollama.log 2>&1 &
+    sleep 3
+fi
+
+# Pull embedding model
+echo -e "${CYAN}[*] Pulling nomic-embed-text model...${RESET}"
+ollama pull nomic-embed-text
+
+echo -e "${CYAN}[+] Download complete.${RESET}"
+echo -e "${CYAN}[*] Please start:${RESET}"
+echo -e "${CYAN}    poetry run sondra -h${RESET}"
