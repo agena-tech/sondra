@@ -1,10 +1,11 @@
-# SONDRA
+# 🔰 SONDRA  
+### Unified Autonomous AI Agent for Research, Security, and Intelligent Automation
 
-**An open-source AI agent for all-purpose tasks.**
+**An open-source platform for multi-domain autonomous agent workflows.**
 
-Sondra is a unified autonomous agent platform built for people who want one
-powerful workspace instead of separate tools for research, security testing,
-automation, memory, terminal work, browser control, and long-running tasks.
+Sondra is a unified AI agent system designed for users who need a single,
+powerful environment instead of fragmented tools for research, security testing,
+automation, memory, terminal operations, browser control, and long-running tasks.
 
 Its first purpose is simple:
 
