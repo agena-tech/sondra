@@ -1,5 +1,0 @@
-SCAN MODE: general
-SCAN LEVEL: standard
-EFFECTIVE MODE: general
-ACTIVE PROMPT MODE: general
-TEMPLATE USED: ollama_general_prompt.jinja
