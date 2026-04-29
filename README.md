@@ -311,6 +311,14 @@ Sondra is licensed under the Apache 2.0 License.
 
 ---
 
+## Authors
+
+This project was developed based on the original `usestrix/strix` project.
+
+Sondra extends the original project with a redesigned memory system, multi-purpose operating modes, new interface designs, and broader autonomous agent workflows.
+
+It is developed in accordance with the Apache 2.0 License.
+
 ## Contact
 
 **Agena Memory Systems**
