@@ -104,6 +104,10 @@ over time.
 
 ---
 
+## NOTE
+
+Sondra’s UI may not fit properly in every terminal window. To fit or adjust it, press `CTRL -`; to enlarge it, press `CTRL +`.
+
 ## Core Modes
 
 ### General Mode
