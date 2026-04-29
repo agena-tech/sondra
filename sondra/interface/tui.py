@@ -880,6 +880,8 @@ class SondraTUIApp(App):  # type: ignore[misc]
         hint_text.append("  Change indicator page  ", style="bold #FFFFFF")
         hint_text.append(" ✖  ", style="bold #FFFFFF on #0b7a64")
         hint_text.append("  CTRL + Q Exit  ", style="bold #FFFFFF")
+        hint_text.append(" ⊞  ", style="bold #FFFFFF on #0b7a64")
+        hint_text.append("  Set window: CTRL +/-  ", style="bold #FFFFFF")
         return hint_text
 
     def _build_voice_volume_text(self) -> Text:
