@@ -239,6 +239,16 @@ poetry run sondra -m general --voice-speech
 
 ---
 
+## Tools Setup
+
+Every tool used by the agent runs locally by default. However, if you want to enable the `web_search` tool:
+
+```bash
+export PERPLEXITY_API_KEY="pplx-..."
+```
+
+You need to have a [Perplexity](https://www.perplexity.ai/) API key. However, this is not a problem, because the `browser_action` tool can also handle this task.
+
 ## Auto Mode
 
 Sondra can infer the mode, level, target, and instruction from natural language.
