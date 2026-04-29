@@ -72,40 +72,7 @@ else
     echo -e "${CYAN}[+] zstd already installed.${RESET}"
 fi
 
-# Install Poetry
-echo -e "${CYAN}[*] Checking Poetry...${RESET}"
-
-if ! command -v poetry >/dev/null 2>&1; then
-    echo -e "${CYAN}[!] Poetry not found, installing...${RESET}"
-
-    POETRY_INSTALLED=false
-
-    if command -v apt >/dev/null 2>&1; then
-        echo -e "${CYAN}[*] Trying to install Poetry with apt...${RESET}"
-
-        if sudo apt update && sudo apt install -y python3-poetry; then
-            POETRY_INSTALLED=true
-            echo -e "${CYAN}[+] Poetry installed with apt.${RESET}"
-        else
-            echo -e "${CYAN}[!] apt install python3-poetry failed.${RESET}"
-        fi
-    fi
-
-    if [ "$POETRY_INSTALLED" = false ]; then
-        echo -e "${CYAN}[*] Installing Poetry with official installer...${RESET}"
-
-        if curl -sSL https://install.python-poetry.org | python3 -; then
-            POETRY_INSTALLED=true
-            echo -e "${CYAN}[+] Poetry installed with official installer.${RESET}"
-        else
-            echo -e "${CYAN}[!] Poetry installation failed.${RESET}"
-            exit 1
-        fi
-    fi
-else
-    echo -e "${CYAN}[+] Poetry already installed.${RESET}"
-fi
-
+# Poetry PATH
 POETRY_PATH="$HOME/.local/bin"
 
 # Detect shell config
@@ -126,13 +93,42 @@ fi
 # Temporary PATH
 export PATH="$POETRY_PATH:$PATH"
 
-# Verify Poetry
-if command -v poetry >/dev/null 2>&1; then
-    echo -e "${CYAN}[+] Poetry installed:${RESET}"
-    poetry --version
+# Install Poetry
+echo -e "${CYAN}[*] Checking Poetry...${RESET}"
+
+if ! command -v poetry >/dev/null 2>&1; then
+    echo -e "${CYAN}[!] Poetry not found, installing...${RESET}"
+
+    if command -v apt >/dev/null 2>&1; then
+        echo -e "${CYAN}[*] Trying to install Poetry with apt...${RESET}"
+        sudo apt update && sudo apt install -y python3-poetry || true
+    fi
+
+    # Check after apt install
+    export PATH="$POETRY_PATH:$PATH"
+
+    if ! command -v poetry >/dev/null 2>&1; then
+        echo -e "${CYAN}[!] Poetry still not found after apt install.${RESET}"
+        echo -e "${CYAN}[*] Trying official Poetry installer...${RESET}"
+
+        curl -sSL https://install.python-poetry.org | python3 -
+
+        export PATH="$POETRY_PATH:$PATH"
+    fi
+
+    # Final Poetry check
+    if ! command -v poetry >/dev/null 2>&1; then
+        echo -e "${CYAN}[!] Poetry installation failed. Command not found.${RESET}"
+        echo -e "${CYAN}[!] Restart your terminal or check PATH manually.${RESET}"
+        exit 1
+    fi
 else
-    echo -e "${CYAN}[!] Poetry not found in PATH. Restart your terminal.${RESET}"
+    echo -e "${CYAN}[+] Poetry already installed.${RESET}"
 fi
+
+# Verify Poetry
+echo -e "${CYAN}[+] Poetry installed:${RESET}"
+poetry --version
 
 # Install Ollama
 echo -e "${CYAN}[*] Checking Ollama...${RESET}"
@@ -140,33 +136,31 @@ echo -e "${CYAN}[*] Checking Ollama...${RESET}"
 if ! command -v ollama >/dev/null 2>&1; then
     echo -e "${CYAN}[!] Ollama not found, installing...${RESET}"
 
-    OLLAMA_INSTALLED=false
-
     if command -v apt >/dev/null 2>&1; then
         echo -e "${CYAN}[*] Trying to install Ollama with apt...${RESET}"
-
-        if sudo apt update && sudo apt install -y ollama; then
-            OLLAMA_INSTALLED=true
-            echo -e "${CYAN}[+] Ollama installed with apt.${RESET}"
-        else
-            echo -e "${CYAN}[!] apt install ollama failed.${RESET}"
-        fi
+        sudo apt update && sudo apt install -y ollama || true
     fi
 
-    if [ "$OLLAMA_INSTALLED" = false ]; then
-        echo -e "${CYAN}[*] Installing Ollama with official installer...${RESET}"
+    # Check after apt install
+    if ! command -v ollama >/dev/null 2>&1; then
+        echo -e "${CYAN}[!] Ollama still not found after apt install.${RESET}"
+        echo -e "${CYAN}[*] Trying official Ollama installer...${RESET}"
 
-        if curl -fsSL https://ollama.com/install.sh | sh; then
-            OLLAMA_INSTALLED=true
-            echo -e "${CYAN}[+] Ollama installed with official installer.${RESET}"
-        else
-            echo -e "${CYAN}[!] Ollama installation failed.${RESET}"
-            exit 1
-        fi
+        curl -fsSL https://ollama.com/install.sh | sh
+    fi
+
+    # Final Ollama check
+    if ! command -v ollama >/dev/null 2>&1; then
+        echo -e "${CYAN}[!] Ollama installation failed. Command not found.${RESET}"
+        exit 1
     fi
 else
     echo -e "${CYAN}[+] Ollama already installed.${RESET}"
 fi
+
+# Verify Ollama
+echo -e "${CYAN}[+] Ollama installed:${RESET}"
+ollama --version || true
 
 # Start Ollama server if needed
 echo -e "${CYAN}[*] Starting Ollama service...${RESET}"
@@ -181,6 +175,13 @@ if ! pgrep -x "ollama" >/dev/null 2>&1; then
     echo -e "${CYAN}[*] Running ollama serve in background...${RESET}"
     nohup ollama serve >/tmp/ollama.log 2>&1 &
     sleep 3
+fi
+
+# Final Ollama server check
+if ! ollama list >/dev/null 2>&1; then
+    echo -e "${CYAN}[!] Ollama server is not responding.${RESET}"
+    echo -e "${CYAN}[!] Check log: /tmp/ollama.log${RESET}"
+    exit 1
 fi
 
 # Pull embedding model
