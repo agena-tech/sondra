@@ -1,3 +1,0 @@
-id,title,severity,timestamp,file
-vuln-0002,SQL Injection in article.php and news.php id parameter — scaa.us,CRITICAL,2026-04-27 18:30:30 UTC,vulnerabilities/vuln-0002.md
-vuln-0001,MySQL Server Exposed to the Internet (TCP/3306) — scaa.us,HIGH,2026-04-27 18:13:45 UTC,vulnerabilities/vuln-0001.md
