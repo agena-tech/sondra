@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/banner.png" alt="Sondra Autonomous Agent Banner" width="100%">
+</p>
+
 # 🔰 SONDRA  
 ### Unified Autonomous AI Agent for Research, Security, and Intelligent Automation
 
