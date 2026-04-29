@@ -34,10 +34,10 @@ Its purpose is simple:
 
 > One agent platform to think, act, remember, investigate, automate, and report.
 
-Sondra is derived from the original STRIX project and extended by Agena Memory
-Systems with a redesigned memory layer, adaptive terminal interface, emotional
-context signals, task scheduling, voice output, and broader general-purpose
-agent workflows.
+Sondra is developed by Agena Memory Systems as a unified autonomous AI agent
+platform with a redesigned memory layer, adaptive terminal interface, emotional
+context signals, task scheduling, voice output, and broad general-purpose agent
+workflows.
 
 ---
 
