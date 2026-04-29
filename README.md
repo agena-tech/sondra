@@ -9,6 +9,7 @@
 **An open-source platform for multi-domain autonomous agent workflows.**
 
 <p align="center">
+  <br />
   <a href="https://www.instagram.com/xx___xxbora_anezatraxx___xx_x/">
     <img src="https://img.shields.io/badge/Instagram-Anezatra-E4405F?logo=instagram&logoColor=white&style=for-the-badge" alt="Instagram">
   </a>
@@ -18,6 +19,7 @@
   <a href="https://t.me/anezatra">
     <img src="https://img.shields.io/badge/Telegram-Anezatra-26A5E4?logo=telegram&logoColor=white&style=for-the-badge" alt="Telegram">
   </a>
+  <br />
 </p>
 
 ---
