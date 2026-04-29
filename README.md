@@ -5,6 +5,8 @@
 # 🔰 SONDRA  
 ### Unified Autonomous AI Agent for Research, Security, and Intelligent Automation
 
+**An open-source platform for multi-domain autonomous agent workflows.**
+
 <p align="center">
   <a href="https://www.instagram.com/xx___xxbora_anezatraxx___xx_x/">
     <img src="https://img.shields.io/badge/Instagram-Anezatra-E4405F?logo=instagram&logoColor=white&style=for-the-badge" alt="Instagram">
@@ -17,7 +19,6 @@
   </a>
 </p>
 
-**An open-source platform for multi-domain autonomous agent workflows.**
 
 Sondra is a unified AI agent system designed for users who need a single,
 powerful environment instead of fragmented tools for research, security testing,
