@@ -73,8 +73,38 @@ else
 fi
 
 # Install Poetry
-echo -e "${CYAN}[*] Downloading Poetry...${RESET}"
-curl -sSL https://install.python-poetry.org | python3 -
+echo -e "${CYAN}[*] Checking Poetry...${RESET}"
+
+if ! command -v poetry >/dev/null 2>&1; then
+    echo -e "${CYAN}[!] Poetry not found, installing...${RESET}"
+
+    POETRY_INSTALLED=false
+
+    if command -v apt >/dev/null 2>&1; then
+        echo -e "${CYAN}[*] Trying to install Poetry with apt...${RESET}"
+
+        if sudo apt update && sudo apt install -y python3-poetry; then
+            POETRY_INSTALLED=true
+            echo -e "${CYAN}[+] Poetry installed with apt.${RESET}"
+        else
+            echo -e "${CYAN}[!] apt install python3-poetry failed.${RESET}"
+        fi
+    fi
+
+    if [ "$POETRY_INSTALLED" = false ]; then
+        echo -e "${CYAN}[*] Installing Poetry with official installer...${RESET}"
+
+        if curl -sSL https://install.python-poetry.org | python3 -; then
+            POETRY_INSTALLED=true
+            echo -e "${CYAN}[+] Poetry installed with official installer.${RESET}"
+        else
+            echo -e "${CYAN}[!] Poetry installation failed.${RESET}"
+            exit 1
+        fi
+    fi
+else
+    echo -e "${CYAN}[+] Poetry already installed.${RESET}"
+fi
 
 POETRY_PATH="$HOME/.local/bin"
 
